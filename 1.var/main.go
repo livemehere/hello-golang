@@ -3,8 +3,8 @@ package main
 import "fmt"
 
 func main() {
-	var f float32 = 42.33
-	var i int = int(f)
+	const f float32 = 42.33
+	var i int = 1
 	var b bool
 	var s string
 
