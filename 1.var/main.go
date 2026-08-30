@@ -2,12 +2,11 @@ package main
 
 import "fmt"
 
-var a, b, c bool = true, true, true
-
-// k := 190 (disabled outside of func)
-
 func main() {
-	var i int = 99
-	k := 190 // enable inside of func
-	fmt.Println(a, b, c, i, k)
+	var i int
+	var f float32
+	var b bool
+	var s string
+
+	fmt.Printf("%v %v %v %q\n", i, f, b, s)
 }
