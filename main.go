@@ -2,9 +2,17 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 )
 
+func add(x, y int) int {
+	return x + y
+}
+
+func swap(a, b string) (string, string) {
+	return b, a
+}
+
 func main() {
-	fmt.Println("Hello world!", rand.Intn(10))
+	a, b := swap("hello", "world")
+	fmt.Println(a, b)
 }
