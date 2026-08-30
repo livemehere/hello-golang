@@ -4,15 +4,23 @@ import (
 	"fmt"
 )
 
+// types of args
 func add(x, y int) int {
 	return x + y
 }
 
+// multiple return
 func swap(a, b string) (string, string) {
 	return b, a
 }
 
+// naked return
+func split(v int) (x, y int) {
+	x = v / 3
+	y = v % 3
+	return
+}
+
 func main() {
-	a, b := swap("hello", "world")
-	fmt.Println(a, b)
+	fmt.Println(split(10))
 }
