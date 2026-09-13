@@ -15,10 +15,6 @@ func main() {
 		fmt.Println("failed!", ok)
 	}
 
-	switch v := x.(type) {
-	case string:
-		fmt.Println("string:", v)
-	case int:
-		fmt.Println("int:", v)
-	}
+	defer fmt.Println("string:")
+	defer fmt.Println("int:")
 }
