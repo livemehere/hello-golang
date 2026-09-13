@@ -1,15 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"my-server/internal/math"
+)
 
 func main() {
-	fmt.Println("hello world")
+	var n int = 10
+	var s string = "Hello world"
+	var ok bool = false
 
-	n := 10
-	var p *int
+	fmt.Println(n, s, ok)
 
-	p = &n
-	*p = 99
-
-	fmt.Println(*p, n)
+	fmt.Println(math.Add(1, 2))
 }
