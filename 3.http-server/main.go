@@ -4,13 +4,16 @@ import (
 	"fmt"
 )
 
+type UserID int
+
 type User struct {
+	Id   UserID
 	Name string
 	age  int
 }
 
 func (u User) hello() {
-	fmt.Println(u.Name, u.age)
+	fmt.Println(u.Id, u.Name, u.age)
 }
 
 func (u *User) SetName(name string) {
@@ -19,9 +22,13 @@ func (u *User) SetName(name string) {
 
 func main() {
 	me := User{
+		Id:   10,
 		Name: "Unknown",
 		age:  99,
 	}
+
+	var n UserID = 88
+	me.Id = n
 
 	me.SetName("Kong")
 	me.hello()
