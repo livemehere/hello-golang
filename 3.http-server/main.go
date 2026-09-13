@@ -1,21 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
+
+type User struct {
+	Name string
+	age  int
+}
+
+func (u User) hello() {
+	fmt.Println(u.Name, u.age)
+}
 
 func main() {
-	m := map[string]int{
-		"a": 1,
-		"b": 2,
+	me := User{
+		Name: "안녕",
+		age:  99,
 	}
 
-	m["c"] = 3
-
-	for key, value := range m {
-		fmt.Println(key, value)
-	}
-
-	delete(m, "a")
-
-	v, ok := m["a"]
-	fmt.Println(v, ok)
+	me.hello()
 }
