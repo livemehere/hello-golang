@@ -2,37 +2,22 @@ package main
 
 import (
 	"fmt"
-
-	"my-server/internal/math"
 )
 
 func main() {
-	var n int = 10
-	var s string = "Hello world"
-	var ok bool = false
+	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	nums2 := nums[:]
 
-	fmt.Println(n, s, ok)
-
-	fmt.Println(math.Add(1, 2))
-
-	result, err := math.Divide(10, 2)
-
-	if err != nil && err.Error() == "division by zero" {
-		fmt.Println("Error!!!!", err)
-	} else {
-		fmt.Println(result, err)
+	for i, v := range nums {
+		fmt.Println(i, v)
+		nums[i] = v + 10
 	}
 
-	// switch
+	fmt.Println("----------------------")
 
-	a := 22
-
-	switch a {
-	case 1:
-		fmt.Println("one")
-	case 2:
-		fmt.Println("two")
-	default:
-		fmt.Println("nothing")
+	for i, v := range nums2 {
+		fmt.Println(i, v)
 	}
+
+	fmt.Println("len is", len(nums))
 }
