@@ -17,4 +17,10 @@ func main() {
 
 	defer fmt.Println("string:")
 	defer fmt.Println("int:")
+
+	f := func(x int) int {
+		return x + 10
+	}
+
+	fmt.Println(f(1))
 }
