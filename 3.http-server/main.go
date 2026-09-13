@@ -14,4 +14,12 @@ func main() {
 	fmt.Println(n, s, ok)
 
 	fmt.Println(math.Add(1, 2))
+
+	result, err := math.Divide(10, 2)
+
+	if err != nil && err.Error() == "division by zero" {
+		fmt.Println("Error!!!!", err)
+	} else {
+		fmt.Println(result, err)
+	}
 }
