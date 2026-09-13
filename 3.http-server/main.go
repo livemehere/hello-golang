@@ -13,11 +13,16 @@ func (u User) hello() {
 	fmt.Println(u.Name, u.age)
 }
 
+func (u *User) SetName(name string) {
+	u.Name = name
+}
+
 func main() {
 	me := User{
-		Name: "안녕",
+		Name: "Unknown",
 		age:  99,
 	}
 
+	me.SetName("Kong")
 	me.hello()
 }
