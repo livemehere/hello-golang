@@ -6,7 +6,8 @@ import (
 
 func main() {
 	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	nums2 := nums[:]
+	nums2 := make([]int, len(nums))
+	copy(nums2, nums)
 
 	for i, v := range nums {
 		fmt.Println(i, v)
