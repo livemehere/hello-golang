@@ -13,4 +13,9 @@ func main() {
 	for key, value := range m {
 		fmt.Println(key, value)
 	}
+
+	delete(m, "a")
+
+	v, ok := m["a"]
+	fmt.Println(v, ok)
 }
