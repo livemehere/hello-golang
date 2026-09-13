@@ -22,4 +22,17 @@ func main() {
 	} else {
 		fmt.Println(result, err)
 	}
+
+	// switch
+
+	a := 22
+
+	switch a {
+	case 1:
+		fmt.Println("one")
+	case 2:
+		fmt.Println("two")
+	default:
+		fmt.Println("nothing")
+	}
 }
