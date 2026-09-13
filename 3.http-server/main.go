@@ -6,6 +6,10 @@ import (
 
 type UserID int
 
+type Person interface {
+	SetName(name string)
+}
+
 type User struct {
 	Id   UserID
 	Name string
@@ -20,6 +24,10 @@ func (u *User) SetName(name string) {
 	u.Name = name
 }
 
+func DoSomthing(p Person) {
+	p.SetName("DODODO")
+}
+
 func main() {
 	me := User{
 		Id:   10,
@@ -30,6 +38,7 @@ func main() {
 	var n UserID = 88
 	me.Id = n
 
-	me.SetName("Kong")
+	//me.SetName("Kong")
+	DoSomthing(&me)
 	me.hello()
 }
