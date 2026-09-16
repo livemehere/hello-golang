@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func sum(nums ...int) int {
-	total := 0
+func sum[T int | float32](nums ...T) T {
+	var total T = 0
 	for _, n := range nums {
 		total += n
 	}
@@ -13,5 +13,6 @@ func sum(nums ...int) int {
 }
 
 func main() {
-	fmt.Println(sum(1, 2, 3, 4))
+	nums := []int{1, 2, 3, 4}
+	fmt.Println(sum(nums...))
 }
