@@ -4,23 +4,14 @@ import (
 	"fmt"
 )
 
+func sum(nums ...int) int {
+	total := 0
+	for _, n := range nums {
+		total += n
+	}
+	return total
+}
+
 func main() {
-	var x any = 19
-
-	s, ok := x.(string)
-
-	if ok {
-		fmt.Println(s)
-	} else {
-		fmt.Println("failed!", ok)
-	}
-
-	defer fmt.Println("string:")
-	defer fmt.Println("int:")
-
-	f := func(x int) int {
-		return x + 10
-	}
-
-	fmt.Println(f(1))
+	fmt.Println(sum(1, 2, 3, 4))
 }
