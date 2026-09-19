@@ -1,6 +1,12 @@
 package main
 
-import f "fmt"
+import "fmt"
+
+const (
+	A = iota
+	B
+	C
+)
 
 func sum[T int | float32](nums ...T) T {
 	var total T = 0
@@ -11,11 +17,9 @@ func sum[T int | float32](nums ...T) T {
 }
 
 func init() {
-	f.Println("init")
+	fmt.Println("init")
 }
 
 func main() {
-	f.Println("main")
-	nums := []int{1, 2, 3, 4}
-	f.Println(sum(nums...))
+	fmt.Println(A, B, C)
 }
