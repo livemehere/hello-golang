@@ -1,21 +1,24 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
-type Animal struct {
-	Name string
-}
-
-type Dog struct {
-	Animal
-	Breed string
+func worker(wg *sync.WaitGroup) {
+	defer wg.Done()
+	fmt.Println("worker")
 }
 
 func main() {
-	d := Dog{
-		Animal: Animal{Name: "kong"},
-		Breed:  "corgi",
-	}
+	var wg sync.WaitGroup
 
-	fmt.Println(d)
+	fmt.Println("before")
+
+	wg.Add(1)
+	go worker(&wg)
+
+	wg.Wait()
+
+	fmt.Println("after")
 }
