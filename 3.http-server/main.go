@@ -2,25 +2,26 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
-type empty struct{}
-
 func main() {
-	done := make(chan empty)
+	ch := make(chan int)
 
-	say := func(word string) {
-		for i := range 10 {
-			fmt.Printf("%d : %s\n", i, word)
-			time.Sleep(time.Millisecond * 100)
-		}
-		done <- empty{}
+	go func() {
+		ch <- 1
+		ch <- 2
+		ch <- 3
+
+		close(ch)
+	}()
+
+	read := func() {
+		v, ok := <-ch
+		fmt.Println(v, ok)
 	}
 
-	go say("hello")
-	go say("world")
-
-	<-done
-	<-done
+	read()
+	read()
+	read()
+	read()
 }
