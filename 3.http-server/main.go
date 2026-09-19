@@ -1,24 +1,32 @@
 package main
 
-import (
-	"fmt"
-	"sync"
-)
+import "fmt"
 
-func worker(wg *sync.WaitGroup) {
-	defer wg.Done()
-	fmt.Println("worker")
+func sum(nums []int, ch chan int) {
+	total := 0
+
+	for _, n := range nums {
+		total += n
+	}
+
+	ch <- total
 }
 
 func main() {
-	var wg sync.WaitGroup
+	ch := make(chan int)
 
-	fmt.Println("before")
+	nums := []int{1, 2, 3, 4, 5, 6}
 
-	wg.Add(1)
-	go worker(&wg)
+	a := nums[:3]
+	b := nums[3:]
 
-	wg.Wait()
+	go sum(a, ch)
+	go sum(b, ch)
 
-	fmt.Println("after")
+	resA := <-ch
+	resB := <-ch
+
+	result := resA + resB
+
+	fmt.Println(result)
 }
