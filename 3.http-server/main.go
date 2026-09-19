@@ -2,26 +2,25 @@ package main
 
 import (
 	"fmt"
-	"sync"
 	"time"
 )
 
-func say(word string, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	for i := range 10 {
-		fmt.Printf("%d : %s\n", i, word)
-		time.Sleep(time.Millisecond * 100)
-	}
-}
+type empty struct{}
 
 func main() {
-	var wg sync.WaitGroup
+	done := make(chan empty)
 
-	wg.Add(2)
+	say := func(word string) {
+		for i := range 10 {
+			fmt.Printf("%d : %s\n", i, word)
+			time.Sleep(time.Millisecond * 100)
+		}
+		done <- empty{}
+	}
 
-	go say("hello", &wg)
-	go say("world", &wg)
+	go say("hello")
+	go say("world")
 
-	wg.Wait()
+	<-done
+	<-done
 }
