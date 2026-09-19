@@ -1,25 +1,14 @@
 package main
 
-import "fmt"
-
-const (
-	A = iota
-	B
-	C
-)
-
-func sum[T int | float32](nums ...T) T {
-	var total T = 0
-	for _, n := range nums {
-		total += n
-	}
-	return total
-}
-
-func init() {
-	fmt.Println("init")
-}
+import f "fmt"
 
 func main() {
-	fmt.Println(A, B, C)
+	name := "한글"
+	runes := []rune(name)
+
+	f.Println("len is ", len(runes))
+
+	for i, r := range name {
+		f.Printf("%d : %c\n", i, r)
+	}
 }
