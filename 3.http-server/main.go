@@ -1,14 +1,13 @@
 package main
 
-import f "fmt"
+import "fmt"
 
 func main() {
-	name := "한글"
-	runes := []rune(name)
+	composed := "한"
+	decomposed := "\u1112\u1161\u11AB"
 
-	f.Println("len is ", len(runes))
+	fmt.Println(composed)
+	fmt.Println(decomposed)
 
-	for i, r := range name {
-		f.Printf("%d : %c\n", i, r)
-	}
+	fmt.Println(composed == decomposed) // false
 }
