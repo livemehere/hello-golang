@@ -1,20 +1,27 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+	"time"
+)
 
-func sum(ch chan int) {
-	fmt.Println("worker")
-	ch <- 10
+func say(word string, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	for i := range 10 {
+		fmt.Printf("%d : %s\n", i, word)
+		time.Sleep(time.Millisecond * 100)
+	}
 }
 
 func main() {
-	ch := make(chan int)
+	var wg sync.WaitGroup
 
-	fmt.Println("before")
+	wg.Add(2)
 
-	go sum(ch)
+	go say("hello", &wg)
+	go say("world", &wg)
 
-	v := <-ch
-
-	fmt.Println("after", v)
+	wg.Wait()
 }
