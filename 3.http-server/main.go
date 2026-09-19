@@ -1,8 +1,6 @@
 package main
 
-import (
-	"fmt"
-)
+import f "fmt"
 
 func sum[T int | float32](nums ...T) T {
 	var total T = 0
@@ -12,7 +10,12 @@ func sum[T int | float32](nums ...T) T {
 	return total
 }
 
+func init() {
+	f.Println("init")
+}
+
 func main() {
+	f.Println("main")
 	nums := []int{1, 2, 3, 4}
-	fmt.Println(sum(nums...))
+	f.Println(sum(nums...))
 }
