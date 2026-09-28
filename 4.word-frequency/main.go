@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"os"
 )
@@ -33,34 +32,22 @@ func main() {
 
 	fmt.Println(file)
 
-	reader := bufio.NewReader(file)
+	scanner := bufio.NewScanner(file)
 
-	for {
-		line, err := reader.ReadString('\n')
-		if len(line) > 0 {
-			fmt.Println("line:", line)
-		}
+	scanner.Split(bufio.ScanWords)
 
-		if err == io.EOF {
-			break
-		}
+	counts := make(map[string]int)
 
-		if err != nil {
-			panic(err)
-		}
-
+	for scanner.Scan() {
+		word := scanner.Text()
+		counts[word]++
 	}
 
-	// scanner := bufio.NewScanner(file)
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
 
-	// for scanner.Scan() {
-	// 	fmt.Println(scanner.Text())
-	// }
-
-	// create dictionary
-	// words := make(map[string]uint)
-
-	// read by word(space) save dic and count it up
-
-	// make dic to array and pick top 3 word
+	for word, count := range counts {
+		fmt.Println(word, count)
+	}
 }
