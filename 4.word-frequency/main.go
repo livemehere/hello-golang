@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
+	"strings"
 )
 
 type WordData struct {
 	Word  string
-	Count uint
+	Count int
 }
 
 func main() {
@@ -26,11 +28,9 @@ func main() {
 	// read file
 	file, err := os.Open(targetFile)
 	if err != nil {
-		log.Fatal("faild to open file", err)
+		log.Fatal("failed to open file: ", err)
 	}
 	defer file.Close()
-
-	fmt.Println(file)
 
 	scanner := bufio.NewScanner(file)
 
@@ -39,15 +39,32 @@ func main() {
 	counts := make(map[string]int)
 
 	for scanner.Scan() {
-		word := scanner.Text()
+		word := strings.ToLower(scanner.Text())
+		word = strings.Trim(word, ",.?!{}()[]")
+		if word == "" {
+			continue
+		}
 		counts[word]++
 	}
 
 	if err := scanner.Err(); err != nil {
-		panic(err)
+		log.Fatal("failed to scan Scanner")
 	}
 
+	var words []WordData
+
 	for word, count := range counts {
-		fmt.Println(word, count)
+		words = append(words, WordData{
+			Word:  word,
+			Count: count,
+		})
+	}
+
+	sort.Slice(words, func(i, j int) bool {
+		return words[i].Count > words[j].Count
+	})
+
+	for _, item := range words[:min(3, len(words))] {
+		fmt.Println(item.Word, item.Count)
 	}
 }
