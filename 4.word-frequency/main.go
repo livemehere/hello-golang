@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -32,34 +33,22 @@ func main() {
 
 	fmt.Println(file)
 
-	buf := make([]byte, 8)
-
-	// var buffers []byte
-	var line []byte
+	reader := bufio.NewReader(file)
 
 	for {
-		n, err := file.Read(buf)
-
-		if n > 0 {
-			// fmt.Println("read", n, "bytes", string(buf[:n]))
-			for _, b := range buf[:n] {
-				if b == '\n' {
-					fmt.Println(string(line))
-					line = line[:0]
-					continue
-				}
-				line = append(line, b)
-			}
+		line, err := reader.ReadString('\n')
+		if len(line) > 0 {
+			fmt.Println("line:", line)
 		}
 
 		if err == io.EOF {
-			fmt.Println("EOF!")
 			break
 		}
 
 		if err != nil {
-			log.Fatal("faild to read file", err)
+			panic(err)
 		}
+
 	}
 
 	// scanner := bufio.NewScanner(file)
