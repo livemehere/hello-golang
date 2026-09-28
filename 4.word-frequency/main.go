@@ -32,16 +32,24 @@ func main() {
 
 	fmt.Println(file)
 
-	var buffers []byte
 	buf := make([]byte, 8)
+
+	// var buffers []byte
+	var line []byte
 
 	for {
 		n, err := file.Read(buf)
 
 		if n > 0 {
 			// fmt.Println("read", n, "bytes", string(buf[:n]))
-			buffers = append(buffers, buf...)
-			fmt.Println(buf, len(buffers))
+			for _, b := range buf[:n] {
+				if b == '\n' {
+					fmt.Println(string(line))
+					line = line[:0]
+					continue
+				}
+				line = append(line, b)
+			}
 		}
 
 		if err == io.EOF {
@@ -53,9 +61,6 @@ func main() {
 			log.Fatal("faild to read file", err)
 		}
 	}
-
-	fmt.Println("len is", len(buffers))
-	fmt.Println(string(buffers))
 
 	// scanner := bufio.NewScanner(file)
 
