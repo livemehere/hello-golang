@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -15,26 +14,30 @@ type Config struct {
 const FILE_NAME = "./config.json"
 
 func main() {
-	data, err := os.ReadFile(FILE_NAME)
+	f, err := os.Open(FILE_NAME)
 	if err != nil {
 		panic(err)
 	}
 
 	config := Config{}
-	json.Unmarshal(data, &config)
 
-	config.Input = "hello world!!"
+	decoder := json.NewDecoder(f)
+	if err := decoder.Decode(&config); err != nil {
+		panic(err)
+	}
+	f.Close()
 
-	output, err := json.MarshalIndent(config, "", "  ")
+	config.Input = "wow"
+
+	wr, err := os.Create(FILE_NAME)
 	if err != nil {
 		panic(err)
 	}
+	defer wr.Close()
 
-	err = os.WriteFile(FILE_NAME, output, 0644)
-	if err != nil {
+	encoder := json.NewEncoder(wr)
+	encoder.SetIndent("", "  ")
+	if err := encoder.Encode(config); err != nil {
 		panic(err)
 	}
-
-	fmt.Println(string(output))
-	fmt.Printf("type is %T\n", output)
 }
