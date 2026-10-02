@@ -39,7 +39,7 @@ func (s *MemoryStorage) Find(id int) (Todo, error) {
 	found, ok := s.todos[id]
 
 	if !ok {
-		return Todo{}, ErrNotFound
+		return Todo{}, fmt.Errorf("failed to find todo %d, %w", id, ErrNotFound)
 	}
 
 	return found, nil
@@ -63,11 +63,19 @@ func main() {
 		Title: "hello world",
 	})
 
-	todo, err := storage.Find(1)
-	fmt.Println(todo, err)
+	{
+		fmt.Println("FINDING...")
+		todo, err := storage.Find(1)
+		fmt.Println(todo, err)
+	}
 
-	storage.Delete(1)
+	{
+		fmt.Println("DELETING...")
+		storage.Delete(1)
+	}
 
-	todo, err = storage.Find(1)
-	fmt.Println(todo, err)
+	_, err := storage.Find(1)
+	if errors.Is(err, ErrNotFound) {
+		fmt.Println("NOT FOUND!!!", err)
+	}
 }
