@@ -21,7 +21,13 @@ type MemoryStorage struct {
 	todos map[int]Todo
 }
 
-var ErrNotFound = errors.New("todo not found")
+type ErrNotFound struct {
+	ID int
+}
+
+func (e ErrNotFound) Error() string {
+	return fmt.Sprintf("todo %d not found", e.ID)
+}
 
 func NewMemoryStorage() *MemoryStorage {
 	return &MemoryStorage{
@@ -39,7 +45,9 @@ func (s *MemoryStorage) Find(id int) (Todo, error) {
 	found, ok := s.todos[id]
 
 	if !ok {
-		return Todo{}, fmt.Errorf("failed to find todo %d, %w", id, ErrNotFound)
+		return Todo{}, fmt.Errorf("failed to find todo %d, %w", id, ErrNotFound{
+			ID: id,
+		})
 	}
 
 	return found, nil
@@ -48,7 +56,7 @@ func (s *MemoryStorage) Find(id int) (Todo, error) {
 func (s *MemoryStorage) Delete(id int) error {
 	_, ok := s.todos[id]
 	if !ok {
-		return ErrNotFound
+		return ErrNotFound{ID: id}
 	}
 
 	delete(s.todos, id)
@@ -74,8 +82,9 @@ func main() {
 		storage.Delete(1)
 	}
 
+	var notfoundErr ErrNotFound
 	_, err := storage.Find(1)
-	if errors.Is(err, ErrNotFound) {
-		fmt.Println("NOT FOUND!!!", err)
+	if errors.As(err, &notfoundErr) {
+		fmt.Printf("NOT FOUND!!! ID : %d\n", notfoundErr.ID)
 	}
 }
