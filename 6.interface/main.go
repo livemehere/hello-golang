@@ -8,14 +8,8 @@ import (
 	"interface/internal/todo"
 )
 
-type Storage interface {
-	Save(todo todo.Todo) error
-	Find(id int) (todo.Todo, error)
-	Delete(id int) error
-}
-
 func main() {
-	var s Storage
+	var s storage.Storage
 
 	s = storage.NewFileStorage("non.josn")
 	s.Save(todo.Todo{
