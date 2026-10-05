@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 
 	todo "interface/internal/todo"
@@ -88,13 +89,14 @@ func (s *FileStorage) Delete(id int) error {
 func (s *FileStorage) load() ([]todo.Todo, error) {
 	file, err := os.Open(s.path)
 	if err != nil {
-		if os.IsNotExist(err) {
-			if err := os.WriteFile(s.path, []byte("[]"), 0o644); err != nil {
-				return nil, err
-			}
-			return []todo.Todo{}, nil
-		}
-		return nil, err
+		// if os.IsNotExist(err) {
+		// 	if err := os.WriteFile(s.path, []byte("[]"), 0o644); err != nil {
+		// 		return nil, err
+		// 	}
+		// 	return []todo.Todo{}, nil
+		// }
+
+		return nil, fmt.Errorf("file not found %s : %w", s.path, err)
 	}
 
 	defer file.Close()

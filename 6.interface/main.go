@@ -17,7 +17,7 @@ type Storage interface {
 func main() {
 	var s Storage
 
-	s = storage.NewMemoryStorage()
+	s = storage.NewFileStorage("non.josn")
 	s.Save(todo.Todo{
 		ID:    1,
 		Title: "hello world",
