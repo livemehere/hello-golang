@@ -15,25 +15,27 @@ type Storage interface {
 }
 
 func main() {
-	storage := storage.NewFileStorage("sample.json")
-	storage.Save(todo.Todo{
+	var s Storage
+
+	s = storage.NewMemoryStorage()
+	s.Save(todo.Todo{
 		ID:    1,
 		Title: "hello world",
 	})
 
 	{
 		fmt.Println("FINDING...")
-		todo, err := storage.Find(1)
+		todo, err := s.Find(1)
 		fmt.Println(todo, err)
 	}
 
 	{
 		fmt.Println("DELETING...")
-		storage.Delete(1)
+		s.Delete(1)
 	}
 
 	var notfoundErr todo.ErrNotFound
-	_, err := storage.Find(1)
+	_, err := s.Find(1)
 	if errors.As(err, &notfoundErr) {
 		fmt.Printf("NOT FOUND!!! ID : %d\n", notfoundErr.ID)
 	}
