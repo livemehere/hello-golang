@@ -1,23 +1,33 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
-func worker(ch chan int) {
-	fmt.Println("worker: before send")
-
-	ch <- 100
-
-	fmt.Println("worker: after send")
+func worker(id int, ch chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	ch <- id * id
 }
 
 func main() {
-	ch := make(chan int)
+	ch := make(chan int, 2)
 
-	go worker(ch)
+	var wg sync.WaitGroup
 
-	fmt.Println("main: before receive")
+	const workerCount = 5
 
-	value := <-ch
+	wg.Add(workerCount)
+	for i := range workerCount {
+		go worker(i, ch, &wg)
+	}
 
-	fmt.Println("main: received", value)
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	for v := range ch {
+		fmt.Println(v)
+	}
 }
