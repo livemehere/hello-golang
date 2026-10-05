@@ -3,70 +3,20 @@ package main
 import (
 	"errors"
 	"fmt"
+
+	"interface/internal/storage"
+	"interface/internal/todo"
 )
 
-type Todo struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
-	Done  bool   `json:"done"`
-}
-
 type Storage interface {
-	Save(todo Todo) error
-	Find(id int) (Todo, error)
+	Save(todo todo.Todo) error
+	Find(id int) (todo.Todo, error)
 	Delete(id int) error
 }
 
-type MemoryStorage struct {
-	todos map[int]Todo
-}
-
-type ErrNotFound struct {
-	ID int
-}
-
-func (e ErrNotFound) Error() string {
-	return fmt.Sprintf("todo %d not found", e.ID)
-}
-
-func NewMemoryStorage() *MemoryStorage {
-	return &MemoryStorage{
-		todos: make(map[int]Todo),
-	}
-}
-
-func (s *MemoryStorage) Save(todo Todo) error {
-	s.todos[todo.ID] = todo
-
-	return nil
-}
-
-func (s *MemoryStorage) Find(id int) (Todo, error) {
-	found, ok := s.todos[id]
-
-	if !ok {
-		return Todo{}, fmt.Errorf("failed to find todo %d, %w", id, ErrNotFound{
-			ID: id,
-		})
-	}
-
-	return found, nil
-}
-
-func (s *MemoryStorage) Delete(id int) error {
-	_, ok := s.todos[id]
-	if !ok {
-		return ErrNotFound{ID: id}
-	}
-
-	delete(s.todos, id)
-
-	return nil
-}
-
 func main() {
-	storage := NewMemoryStorage()
-	storage.Save(Todo{
+	storage := storage.NewFileStorage("sample.json")
+	storage.Save(todo.Todo{
 		ID:    1,
 		Title: "hello world",
 	})
@@ -82,7 +32,7 @@ func main() {
 		storage.Delete(1)
 	}
 
-	var notfoundErr ErrNotFound
+	var notfoundErr todo.ErrNotFound
 	_, err := storage.Find(1)
 	if errors.As(err, &notfoundErr) {
 		fmt.Printf("NOT FOUND!!! ID : %d\n", notfoundErr.ID)
