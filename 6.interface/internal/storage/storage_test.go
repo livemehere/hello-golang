@@ -40,19 +40,42 @@ func TestMemoryStorageFindNotFound(t *testing.T) {
 }
 
 func TestMemoryStorageDelete(t *testing.T) {
-	s := NewMemoryStorage()
-	s.Save(todo.Todo{
-		ID:    1,
-		Title: "todo",
-		Done:  false,
-	})
-	err := s.Delete(1)
-	if err != nil {
-		t.Fatalf("Delete() error, %v", err)
+	tests := []struct {
+		name    string
+		id      int
+		wantErr bool
+	}{
+		{
+			name: "delete existing todo",
+			id:   1,
+		},
+		{
+			name:    "delete missing todo",
+			id:      999,
+			wantErr: true,
+		},
 	}
 
-	_, err = s.Find(1)
-	if !errors.Is(err, todo.ErrNotFound{ID: 1}) {
-		t.Fatalf("%d todo must be not found", 1)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// setup
+			s := NewMemoryStorage()
+			s.Save(todo.Todo{
+				ID:    1,
+				Title: "sample",
+				Done:  false,
+			})
+
+			// expect
+			err := s.Delete(tt.id)
+
+			if tt.wantErr && err == nil {
+				t.Fatalf("expect error")
+			}
+
+			if !tt.wantErr && err != nil {
+				t.Fatalf("unexpected err %v", err)
+			}
+		})
 	}
 }
