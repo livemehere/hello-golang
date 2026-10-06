@@ -7,6 +7,7 @@ import (
 
 func main() {
 	var wg sync.WaitGroup
+	var mu sync.Mutex
 
 	count := 0
 
@@ -15,7 +16,10 @@ func main() {
 	for range 1000 {
 		go func() {
 			defer wg.Done()
+
+			mu.Lock()
 			count++
+			mu.Unlock()
 		}()
 	}
 
