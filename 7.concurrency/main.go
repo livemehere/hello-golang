@@ -3,52 +3,23 @@ package main
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 )
-
-type Counter struct {
-	mu    sync.Mutex
-	value int
-}
 
 func main() {
 	var wg sync.WaitGroup
-	var once sync.Once
-	done := make(chan bool)
+	var count atomic.Int64
 
-	var counter Counter
+	wg.Add(1000)
 
-	created := 0
-
-loop:
 	for range 1000 {
-		select {
-		case <-done:
-			break loop
-		default:
-		}
-
-		created++
-
-		wg.Add(1)
 		go func() {
 			defer wg.Done()
-
-			counter.mu.Lock()
-
-			if counter.value == 500 {
-				counter.mu.Unlock()
-				once.Do(func() {
-					close(done)
-				})
-				return
-			}
-			counter.value++
-			counter.mu.Unlock()
+			count.Add(1)
 		}()
-
 	}
 
 	wg.Wait()
 
-	fmt.Println(counter.value, created)
+	fmt.Println(count.Load())
 }
