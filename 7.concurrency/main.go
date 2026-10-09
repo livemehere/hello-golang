@@ -158,7 +158,7 @@ func writeResponse(conn net.Conn, res Response) error {
 	return nil
 }
 
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn, router *Router) {
 	defer conn.Close()
 
 	reader := bufio.NewReader(conn)
@@ -168,35 +168,71 @@ func handleConnection(conn net.Conn) {
 		log.Fatal(err)
 	}
 
+	res := router.Serve(req)
+
 	fmt.Printf("method: %s\n", req.Method)
 	fmt.Printf("path: %s\n", req.Path)
 	fmt.Printf("version: %s\n", req.Version)
 	fmt.Printf("headers: %#v\n", req.Headers)
 	fmt.Printf("body: %s\n", req.Body)
 
-	if req.Method == "GET" && req.Path == "/hello" {
-		res := Response{
-			StatusCode: 200,
+	if err = writeResponse(conn, res); err != nil {
+		log.Fatal(err)
+	}
+}
+
+type Router struct {
+	routes map[RouteKey]HandlerFunc
+}
+
+type RouteKey struct {
+	Method string
+	Path   string
+}
+
+type HandlerFunc func(Request) Response
+
+func (r *Router) Handle(method string, path string, handler HandlerFunc) {
+	key := RouteKey{
+		Method: method,
+		Path:   path,
+	}
+	r.routes[key] = handler
+}
+
+func (r *Router) Serve(req Request) Response {
+	key := RouteKey{
+		Method: req.Method,
+		Path:   req.Path,
+	}
+
+	handler, ok := r.routes[key]
+	if !ok {
+		return Response{
+			StatusCode: 404,
 			Headers: map[string]string{
 				"Content-Type": "text/plain",
 			},
-			Body: []byte("hello"),
+			Body: []byte("not fount"),
 		}
-		if err = writeResponse(conn, res); err != nil {
-			log.Fatal(err)
-		}
-		return
 	}
 
-	res := Response{
-		StatusCode: 404,
+	return handler(req)
+}
+
+func NewRouter() *Router {
+	return &Router{
+		routes: make(map[RouteKey]HandlerFunc),
+	}
+}
+
+func helloHandler(req Request) Response {
+	return Response{
+		StatusCode: 200,
 		Headers: map[string]string{
 			"Content-Type": "text/plain",
 		},
-		Body: []byte("not fount"),
-	}
-	if err = writeResponse(conn, res); err != nil {
-		log.Fatal(err)
+		Body: []byte("hello"),
 	}
 }
 
@@ -209,6 +245,9 @@ func main() {
 
 	fmt.Println("listening on :7777")
 
+	router := NewRouter()
+	router.Handle("GET", "/hello", helloHandler)
+
 	for {
 
 		conn, err := listener.Accept()
@@ -216,7 +255,7 @@ func main() {
 			log.Fatal(err)
 		}
 		fmt.Println("==== client connected:", conn.RemoteAddr().Network(), conn.RemoteAddr().String(), "====")
-		go handleConnection(conn)
+		go handleConnection(conn, router)
 		fmt.Println("")
 	}
 }
