@@ -53,15 +53,24 @@ func main() {
 	// header parsing
 	headers := make(map[string]string)
 
-	line, err = reader.ReadString('\n')
-	if err != nil {
-		log.Fatal(err)
+	for {
+		line, err = reader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		line = strings.TrimSuffix(line, "\r\n")
+		if line == "" {
+			break
+		}
+
+		parts = strings.SplitN(line, ":", 2)
+		key := parts[0]
+		value := parts[1]
+		headers[key] = value
 	}
-	line = strings.TrimSuffix(line, "\r\n")
-	parts = strings.Split(line, ":")
-	headers[parts[0]] = parts[1]
-	fmt.Printf("raw: %q\n\n", line)
-	fmt.Printf("raw: %q\n", headers)
+
+	fmt.Printf("headers: %q\n", headers)
 
 	response := "HTTP/1.1 200 OK\r\n" +
 		"Content-Type: text/plain\r\n" +
