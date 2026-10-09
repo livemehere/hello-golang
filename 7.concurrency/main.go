@@ -15,7 +15,7 @@ func main() {
 
 	fmt.Println("listening on :7777")
 
-	// wait for connection
+	// ---- REQUEST START ----
 	conn, err := listener.Accept()
 	if err != nil {
 		log.Fatal(err)
@@ -30,6 +30,20 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fmt.Printf("----- request -----\n")
 	fmt.Printf("receieved %d bytes\n", n)
 	fmt.Println(string(buf[:n]))
+
+	response := "HTTP/1.1 200 OK\r\n" +
+		"Content-Type: text/plain\r\n" +
+		"Content-Length: 5\r\n" +
+		"\r\n" +
+		"hello"
+
+	_, err = conn.Write([]byte(response))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// ---- REQUEST END ----
 }
