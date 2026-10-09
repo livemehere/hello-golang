@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"net"
+	"strings"
 )
 
 func main() {
@@ -24,15 +26,23 @@ func main() {
 
 	fmt.Println("client connected:", conn.RemoteAddr().Network(), conn.RemoteAddr().String())
 
-	buf := make([]byte, 4096)
-	n, err := conn.Read(buf)
+	reader := bufio.NewReader(conn)
+
+	line, err := reader.ReadString('\n')
 	if err != nil {
 		log.Fatal(err)
 	}
+	line = strings.TrimSuffix(line, "\r\n")
+	parts := strings.Split(line, " ")
+
+	method := parts[0]
+	path := parts[1]
+	version := parts[2]
 
 	fmt.Printf("----- request -----\n")
-	fmt.Printf("receieved %d bytes\n", n)
-	fmt.Println(string(buf[:n]))
+	fmt.Printf("METHOD: %q\n", method)
+	fmt.Printf("PATH: %q\n", path)
+	fmt.Printf("VERSION: %q\n", version)
 
 	response := "HTTP/1.1 200 OK\r\n" +
 		"Content-Type: text/plain\r\n" +
