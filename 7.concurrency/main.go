@@ -174,14 +174,28 @@ func handleConnection(conn net.Conn) {
 	fmt.Printf("headers: %#v\n", req.Headers)
 	fmt.Printf("body: %s\n", req.Body)
 
+	if req.Method == "GET" && req.Path == "/hello" {
+		res := Response{
+			StatusCode: 200,
+			Headers: map[string]string{
+				"Content-Type": "text/plain",
+			},
+			Body: []byte("hello"),
+		}
+		err = writeResponse(conn, res)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
 	res := Response{
-		StatusCode: 200,
+		StatusCode: 404,
 		Headers: map[string]string{
 			"Content-Type": "text/plain",
 		},
-		Body: []byte("hello"),
+		Body: []byte("not fount"),
 	}
-
 	err = writeResponse(conn, res)
 	if err != nil {
 		log.Fatal(err)
