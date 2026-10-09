@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -236,6 +237,25 @@ func helloHandler(req Request) Response {
 	}
 }
 
+func usersHandler(req Request) Response {
+	users := []string{"kong", "Ha"}
+	body, err := json.Marshal(users)
+	if err != nil {
+		return Response{
+			StatusCode: 500,
+			Body:       []byte("server error"),
+		}
+	}
+
+	return Response{
+		StatusCode: 200,
+		Headers: map[string]string{
+			"Content-Type": "text/plain",
+		},
+		Body: body,
+	}
+}
+
 func main() {
 	listener, err := net.Listen("tcp", ":7777")
 	if err != nil {
@@ -247,6 +267,7 @@ func main() {
 
 	router := NewRouter()
 	router.Handle("GET", "/hello", helloHandler)
+	router.Handle("GET", "/users", usersHandler)
 
 	for {
 
