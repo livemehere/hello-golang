@@ -182,8 +182,7 @@ func handleConnection(conn net.Conn) {
 			},
 			Body: []byte("hello"),
 		}
-		err = writeResponse(conn, res)
-		if err != nil {
+		if err = writeResponse(conn, res); err != nil {
 			log.Fatal(err)
 		}
 		return
@@ -196,8 +195,7 @@ func handleConnection(conn net.Conn) {
 		},
 		Body: []byte("not fount"),
 	}
-	err = writeResponse(conn, res)
-	if err != nil {
+	if err = writeResponse(conn, res); err != nil {
 		log.Fatal(err)
 	}
 }
