@@ -3,8 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -28,6 +30,7 @@ func main() {
 
 	reader := bufio.NewReader(conn)
 
+	// === REQUEST INFO ===
 	line, err := reader.ReadString('\n')
 	if err != nil {
 		log.Fatal(err)
@@ -48,9 +51,9 @@ func main() {
 
 	fmt.Printf("METHOD: %q\n", method)
 	fmt.Printf("PATH: %q\n", path)
-	fmt.Printf("VERSION: %q\n", version)
+	fmt.Printf("VERSION: %q\n\n", version)
 
-	// header parsing
+	// === PARSING HEADERS ===
 	headers := make(map[string]string)
 
 	for {
@@ -65,12 +68,32 @@ func main() {
 		}
 
 		parts = strings.SplitN(line, ":", 2)
-		key := parts[0]
-		value := parts[1]
+		key := strings.TrimSpace(parts[0])
+		value := strings.TrimSpace(parts[1])
 		headers[key] = value
 	}
 
-	fmt.Printf("headers: %q\n", headers)
+	fmt.Printf("headers: %q\n\n", headers)
+
+	// === READ body ===
+	contentLength := 0
+	if value, ok := headers["Content-Length"]; ok {
+		n, err := strconv.Atoi(value)
+		if err != nil {
+			log.Fatal("invalid Content-Length")
+		}
+
+		contentLength = n
+	}
+
+	fmt.Println("Content-Length:", contentLength)
+	if contentLength > 0 {
+		body := make([]byte, contentLength)
+		if _, err := io.ReadFull(reader, body); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("body : %q\n", body)
+	}
 
 	response := "HTTP/1.1 200 OK\r\n" +
 		"Content-Type: text/plain\r\n" +
