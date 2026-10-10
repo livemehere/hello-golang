@@ -17,6 +17,7 @@ type Request struct {
 	Version string
 	Headers map[string]string
 	Body    []byte
+	Params  map[string]string
 }
 
 type Response struct {
@@ -183,47 +184,92 @@ func handleConnection(conn net.Conn, router *Router) {
 }
 
 type Router struct {
-	routes map[RouteKey]HandlerFunc
+	routes []Route
 }
 
-type RouteKey struct {
-	Method string
-	Path   string
+type Route struct {
+	Method  string
+	Pattern string
+	Handler HandlerFunc
 }
 
 type HandlerFunc func(Request) Response
 
-func (r *Router) Handle(method string, path string, handler HandlerFunc) {
-	key := RouteKey{
-		Method: method,
-		Path:   path,
-	}
-	r.routes[key] = handler
-}
+func matchPath(pattern string, path string) (map[string]string, bool) {
+	// /users/{id} => ['users', '{id}']
+	patternParts := strings.Split(strings.Trim(pattern, "/"), "/")
 
-func (r *Router) Serve(req Request) Response {
-	key := RouteKey{
-		Method: req.Method,
-		Path:   req.Path,
+	// /users/12 => ['users', '12']
+	pathParts := strings.Split(strings.Trim(path, "/"), "/")
+
+	if len(patternParts) != len(pathParts) {
+		return nil, false
 	}
 
-	handler, ok := r.routes[key]
-	if !ok {
-		return Response{
-			StatusCode: 404,
-			Headers: map[string]string{
-				"Content-Type": "text/plain",
-			},
-			Body: []byte("not fount"),
+	params := make(map[string]string)
+
+	for i := range patternParts {
+		patternPart := patternParts[i]
+		pathPart := pathParts[i]
+
+		isParam := strings.HasPrefix(patternPart, "{") && strings.HasSuffix(patternPart, "}")
+
+		if isParam {
+			// id
+			name := strings.TrimSuffix(strings.TrimPrefix(patternPart, "{"), "}")
+
+			params[name] = pathPart
+			continue
+		}
+
+		if patternPart != pathPart {
+			return nil, false
 		}
 	}
 
-	return handler(req)
+	return params, true
+}
+
+func (r *Router) Handle(method string, pattern string, handler HandlerFunc) {
+	r.routes = append(r.routes, Route{
+		Method:  method,
+		Pattern: pattern,
+		Handler: handler,
+	})
+}
+
+func (r *Router) Serve(req Request) Response {
+	for _, route := range r.routes {
+		if route.Method != req.Method {
+			continue
+		}
+
+		params, ok := matchPath(
+			route.Pattern,
+			req.Path,
+		)
+
+		if !ok {
+			continue
+		}
+
+		req.Params = params
+
+		return route.Handler(req)
+	}
+
+	return Response{
+		StatusCode: 404,
+		Headers: map[string]string{
+			"Content-Type": "text/plain",
+		},
+		Body: []byte("not fount"),
+	}
 }
 
 func NewRouter() *Router {
 	return &Router{
-		routes: make(map[RouteKey]HandlerFunc),
+		routes: []Route{},
 	}
 }
 
@@ -256,6 +302,17 @@ func usersHandler(req Request) Response {
 	}
 }
 
+func userHandler(req Request) Response {
+	id := req.Params["id"]
+	return Response{
+		StatusCode: 200,
+		Headers: map[string]string{
+			"Content-Type": "text/plain",
+		},
+		Body: []byte(fmt.Sprintf("id is %s", id)),
+	}
+}
+
 func main() {
 	listener, err := net.Listen("tcp", ":7777")
 	if err != nil {
@@ -268,6 +325,7 @@ func main() {
 	router := NewRouter()
 	router.Handle("GET", "/hello", helloHandler)
 	router.Handle("GET", "/users", usersHandler)
+	router.Handle("GET", "/users/{id}", userHandler)
 
 	for {
 
