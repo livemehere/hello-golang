@@ -2,13 +2,18 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"sync"
+	"syscall"
 	"time"
 )
 
@@ -351,8 +356,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer listener.Close()
-
 	fmt.Println("listening on :7777")
 
 	router := NewRouter()
@@ -361,13 +364,36 @@ func main() {
 	router.Handle("GET", "/users/{id}", userHandler)
 	router.Handle("GET", "/users/admin", userAdminHandler)
 
-	for {
+	var wg sync.WaitGroup
 
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	go func() {
+		<-ctx.Done()
+		log.Println("[shutdown] shutdown signal received")
+		log.Println("[shutdown] stop accepting new connections")
+
+		if err := listener.Close(); err != nil {
+			log.Println("[shutdown] listener close:", err)
+		}
+	}()
+
+	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		wg.Add(1)
+
 		log.Printf("[TCP new connection] %s", conn.RemoteAddr())
-		go handleConnection(conn, router)
+		go func() {
+			defer wg.Done()
+			handleConnection(conn, router)
+		}()
 	}
+	log.Println("[shubdown] waiting for active connections")
+	wg.Wait()
+	log.Println("[shutdown] server stopped")
 }
