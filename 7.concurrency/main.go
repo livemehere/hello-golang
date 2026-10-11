@@ -9,6 +9,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Request struct {
@@ -164,22 +165,44 @@ func handleConnection(conn net.Conn, router *Router) {
 	defer conn.Close()
 
 	reader := bufio.NewReader(conn)
+	requestCount := 0
 
-	req, err := parseRequest(reader)
-	if err != nil {
-		log.Fatal(err)
-	}
+	for {
 
-	res := router.Serve(req)
+		// keep alive for 5 sec
+		err := conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+		// connection close
+		if err != nil {
+			log.Println("set read deadline:", err)
+			return
+		}
 
-	fmt.Printf("method: %s\n", req.Method)
-	fmt.Printf("path: %s\n", req.Path)
-	fmt.Printf("version: %s\n", req.Version)
-	fmt.Printf("headers: %#v\n", req.Headers)
-	fmt.Printf("body: %s\n", req.Body)
+		req, err := parseRequest(reader)
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				log.Printf("[TCP idle timeout] %s: 5초 동안 요청이 없어 연결 종료", conn.RemoteAddr())
+			} else {
+				log.Println("parse request:", err)
+			}
+			return
+		}
 
-	if err = writeResponse(conn, res); err != nil {
-		log.Fatal(err)
+		requestCount++
+		if requestCount > 1 {
+			log.Printf("[TCP reused] %s: 요청 #%d %s %s", conn.RemoteAddr(), requestCount, req.Method, req.Path)
+		} else {
+			log.Printf("[TCP request] %s: 요청 #%d %s %s", conn.RemoteAddr(), requestCount, req.Method, req.Path)
+		}
+
+		res := router.Serve(req)
+
+		if err = writeResponse(conn, res); err != nil {
+			log.Println(err)
+			return
+		}
 	}
 }
 
@@ -313,6 +336,16 @@ func userHandler(req Request) Response {
 	}
 }
 
+func userAdminHandler(req Request) Response {
+	return Response{
+		StatusCode: 200,
+		Headers: map[string]string{
+			"Content-Type": "text/plain",
+		},
+		Body: []byte("admin user"),
+	}
+}
+
 func main() {
 	listener, err := net.Listen("tcp", ":7777")
 	if err != nil {
@@ -326,6 +359,7 @@ func main() {
 	router.Handle("GET", "/hello", helloHandler)
 	router.Handle("GET", "/users", usersHandler)
 	router.Handle("GET", "/users/{id}", userHandler)
+	router.Handle("GET", "/users/admin", userAdminHandler)
 
 	for {
 
@@ -333,8 +367,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("==== client connected:", conn.RemoteAddr().Network(), conn.RemoteAddr().String(), "====")
+		log.Printf("[TCP new connection] %s", conn.RemoteAddr())
 		go handleConnection(conn, router)
-		fmt.Println("")
 	}
 }
