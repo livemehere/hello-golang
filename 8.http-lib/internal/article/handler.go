@@ -40,12 +40,13 @@ func (h *ArticleHandler) Find(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		http.Error(w, "invalid article id", http.StatusBadRequest)
+		return
 	}
 
 	found, err := h.store.Find(id)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
-		http.Error(w, fmt.Sprintf("not found article %d", id), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("not found article %d", id), http.StatusNotFound)
 		return
 	}
 

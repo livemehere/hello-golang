@@ -14,7 +14,9 @@ type ArticleMemoryStore struct {
 func (s *ArticleMemoryStore) List() ([]Article, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return s.articles, nil
+	articles := make([]Article, len(s.articles))
+	copy(articles, s.articles)
+	return articles, nil
 }
 
 func (s *ArticleMemoryStore) Find(id int) (Article, error) {
