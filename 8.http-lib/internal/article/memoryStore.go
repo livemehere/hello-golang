@@ -1,5 +1,7 @@
 package article
 
+import "fmt"
+
 type ArticleMemoryStore struct {
 	articles []Article
 }
@@ -17,7 +19,7 @@ func (s *ArticleMemoryStore) Find(id int) (Article, error) {
 		return article, nil
 	}
 
-	return Article{}, nil
+	return Article{}, fmt.Errorf("article %d not found", id)
 }
 
 func (s *ArticleMemoryStore) Save(article Article) error {

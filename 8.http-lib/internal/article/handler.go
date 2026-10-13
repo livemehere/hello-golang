@@ -44,25 +44,16 @@ func (h *ArticleHandler) Find(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid article id", http.StatusBadRequest)
 	}
 
-	articles, err := h.store.List()
+	found, err := h.store.Find(id)
 	if err != nil {
-		http.Error(w, "internal error", http.StatusInternalServerError)
-		return
-	}
-
-	for _, article := range articles {
-		if article.ID != id {
-			continue
-		}
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(article); err != nil {
-			http.Error(w, "failed to encode response", http.StatusInternalServerError)
-		}
+		http.Error(w, fmt.Sprintf("not found article %d", id), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	http.Error(w, fmt.Sprintf("not found article %d", id), http.StatusInternalServerError)
+	if err := json.NewEncoder(w).Encode(found); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	}
 }
 
 func (h *ArticleHandler) Create(w http.ResponseWriter, r *http.Request) {
