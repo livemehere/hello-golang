@@ -16,8 +16,6 @@ type ArticleHandler struct {
 	store ArticleStore
 }
 
-var idSeq = 3
-
 func NewArticleHandler(store ArticleStore) *ArticleHandler {
 	return &ArticleHandler{
 		store: store,
@@ -63,21 +61,21 @@ func (h *ArticleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	idSeq++
 	article := Article{
-		ID:      idSeq,
+		ID:      0,
 		Title:   input.Title,
 		Content: input.Content,
 	}
 
-	if err := h.store.Save(article); err != nil {
+	created, err := h.store.Save(article)
+	if err != nil {
 		http.Error(w, "failed to encode response", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(article); err != nil {
+	if err := json.NewEncoder(w).Encode(created); err != nil {
 		return
 	}
 }

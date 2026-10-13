@@ -9,5 +9,5 @@ type Article struct {
 type ArticleStore interface {
 	List() ([]Article, error)
 	Find(id int) (Article, error)
-	Save(article Article) error
+	Save(article Article) (Article, error)
 }
